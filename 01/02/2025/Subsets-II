@@ -1,0 +1,49 @@
+#include <stdlib.h>
+#include <string.h>
+
+void backtrack(int* nums, int numsSize, int** result, int* returnSize, int* temp, int tempSize, int** returnColumnSizes, int start) {
+    // Add the current subset to the result
+    result[*returnSize] = (int*)malloc(tempSize * sizeof(int));
+    memcpy(result[*returnSize], temp, tempSize * sizeof(int));
+    (*returnColumnSizes)[*returnSize] = tempSize;
+    (*returnSize)++;
+    
+    // Generate all possible subsets starting from 'start'
+    for (int i = start; i < numsSize; i++) {
+        // Skip duplicates
+        if (i > start && nums[i] == nums[i - 1]) continue;
+        
+        // Include nums[i] in the current subset
+        temp[tempSize] = nums[i];
+        backtrack(nums, numsSize, result, returnSize, temp, tempSize + 1, returnColumnSizes, i + 1);
+    }
+}
+
+/**
+ * Return an array of arrays of size *returnSize.
+ * The sizes of the arrays are returned as *returnColumnSizes array.
+ * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
+ */
+int** subsetsWithDup(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {
+    // Sort the array to handle duplicates
+    qsort(nums, numsSize, sizeof(int), (int(*)(const void*, const void*))strcmp);
+    
+    // The maximum number of subsets for an array of size numsSize is 2^numsSize
+    int maxSubsets = 1 << numsSize;
+    
+    // Allocate memory for the result array and returnColumnSizes
+    int** result = (int**)malloc(maxSubsets * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(maxSubsets * sizeof(int));
+    *returnSize = 0;
+    
+    // Temporary array to store the current subset
+    int* temp = (int*)malloc(numsSize * sizeof(int));
+    
+    // Start the backtracking process
+    backtrack(nums, numsSize, result, returnSize, temp, 0, returnColumnSizes, 0);
+    
+    // Free the temporary array
+    free(temp);
+    
+    return result;
+}
