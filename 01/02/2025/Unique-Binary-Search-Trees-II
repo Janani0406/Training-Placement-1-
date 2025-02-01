@@ -1,0 +1,43 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+struct TreeNode** buildTrees(int start,int end,int* returnSize){
+    struct TreeNode** trees=NULL;
+    int numTrees=0;
+    if(start>end){
+        *returnSize=1;
+        trees=malloc(*returnSize*sizeof(struct TreeNode*));
+        trees[0]=NULL;
+        return trees;
+    }
+    for(int rootIndex=start;rootIndex<=end;rootIndex++){
+        int leftSize,rightSize;
+        struct TreeNode** leftSubtree=buildTrees(start,rootIndex-1,&leftSize);
+        struct TreeNode** rightSubtree=buildTrees(rootIndex+1,end,&rightSize);
+        for(int leftIndex=0;leftIndex<leftSize;leftIndex++){
+            for(int rightIndex=0;rightIndex<rightSize;rightIndex++){
+                struct TreeNode* root=malloc(sizeof(struct TreeNode));
+                root->val=rootIndex;
+                root->left=leftSubtree[leftIndex];
+                root->right=rightSubtree[rightIndex];
+
+                numTrees++;
+                trees=(struct TreeNode**)realloc(trees,numTrees*sizeof(struct TreeNode*));
+                trees[numTrees-1]=root;
+            }
+        }
+    }
+    *returnSize=numTrees;
+    return trees;
+}
+struct TreeNode** generateTrees(int n, int* returnSize) {
+    return buildTrees(1,n,returnSize);
+}
