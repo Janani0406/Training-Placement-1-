@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+void dfs(const char* s, int start, int depth, char path[][4], char** ans, int* returnSize) {
+    if (depth == 4 && start == strlen(s)) {
+        char ip[16];  // maximum IP address length is 15 characters + 1 for null terminator
+        sprintf(ip, "%s.%s.%s.%s", path[0], path[1], path[2], path[3]);
+        ans[*returnSize] = strdup(ip);
+        (*returnSize)++;
+        return;
+    }
+    if (depth == 4 || start == strlen(s))
+        return;
+
+    for (int length = 1; length <= 3; ++length) {
+        if (start + length > strlen(s))
+            return;  // out-of-bounds
+        if (length > 1 && s[start] == '0')
+            return;  // leading '0'
+
+        char num[4];
+        strncpy(num, s + start, length);
+        num[length] = '\0';
+        
+        if (atoi(num) > 255)
+            return;
+
+        strcpy(path[depth], num);
+        dfs(s, start + length, depth + 1, path, ans, returnSize);
+    }
+}
+
+char** restoreIpAddresses(char* s, int* returnSize) {
+    char** ans = (char**)malloc(100 * sizeof(char*));  // allocate memory for storing results
+    *returnSize = 0;
+    char path[4][4];  // array to store the segments of the IP address
+    dfs(s, 0, 0, path, ans, returnSize);
+    return ans;
+}
