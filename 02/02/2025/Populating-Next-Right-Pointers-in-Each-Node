@@ -1,0 +1,49 @@
+/**
+ * Definition for a Node.
+ * struct Node {
+ *     int val;
+ *     struct Node *left;
+ *     struct Node *right;
+ *     struct Node *next;
+ * };
+ */
+
+struct Node* connect(struct Node* root)
+{
+    struct Node *pList = root;
+
+    if(root == NULL)
+    {
+        return NULL;
+    }
+
+    while(pList->left != NULL)
+    {
+        // connect pList children
+
+        struct Node *p = pList;
+        struct Node *pTail = NULL;
+        while(p != NULL)
+        {
+            if(pTail == NULL)
+            {
+                pTail = p->left;
+            }
+            else
+            {
+                pTail->next = p->left;
+                pTail = p->left;
+            }
+
+            pTail->next = p->right;
+            pTail = p->right;
+
+            p = p->next;
+        }
+
+
+        pList = pList->left;
+    }
+
+    return root;
+}
