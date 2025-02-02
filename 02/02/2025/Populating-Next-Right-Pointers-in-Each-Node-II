@@ -1,0 +1,63 @@
+/**
+ * Definition for a Node.
+ * struct Node {
+ *     int val;
+ *     struct Node *left;
+ *     struct Node *right;
+ *     struct Node *next;
+ * };
+ */
+struct queue{
+    struct Node * arr[6000];
+    int front;
+    int rear;
+};
+
+void init_queue(struct queue * q){
+    q->rear=-1;
+    q->front=0;
+}
+
+void enqueue(struct queue * q, struct Node * node){
+    q->arr[++(q->rear)]=node;
+}
+
+struct Node * dequeue(struct queue * q){
+    return q->arr[(q->front)++];
+}
+
+int isempty(struct queue * q){
+    return (q->front>q->rear);
+}
+struct Node* connect(struct Node* root) {
+	if(root==NULL){
+        return NULL;
+    }
+
+    struct queue q;
+    init_queue(&q);
+    enqueue(&q, root);
+
+    while(!isempty(&q)){
+        int levelSize=q.rear-q.front+1;
+        struct Node * prev=NULL;
+        for(int i=0;i<levelSize;i++){
+            struct Node * current=dequeue(&q);
+            if(prev!=NULL){
+                prev->next=current;
+            }
+            prev=current;
+            if(current->left!=NULL){
+                enqueue(&q, current->left);
+            }
+
+            if(current->right!=NULL){
+                enqueue(&q, current->right);
+            }
+        }
+        if(prev!=NULL){
+            prev->next=NULL;
+        }
+    }
+    return root;
+}
