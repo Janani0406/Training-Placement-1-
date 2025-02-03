@@ -1,0 +1,16 @@
+int maxProfit(int* prices, int pricesSize) {
+    int i,profit=0,buy,sell;
+    buy=prices[0];
+    for(i=1;i<pricesSize;i++){
+        if(buy > prices[i]){
+            buy=prices[i];
+            continue;   // can't sell on the same day
+        }
+        if((i==pricesSize-1) || (prices[i]-buy >= prices[i+1]-buy )){   // [i+1] is not unvalid for previos condition
+            if((prices[i]-buy)>0)   // for last sell condition
+                profit+=prices[i]-buy;
+            buy=2147483647;     // MAX_INT in number form, to buy next after sell
+        } 
+    }
+    return profit;
+}
