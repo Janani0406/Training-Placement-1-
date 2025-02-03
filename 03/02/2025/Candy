@@ -1,0 +1,33 @@
+int candy(int* ratings, int ratingsSize) {
+    int totalCandies = ratingsSize;
+    int i = 1;
+
+    while (i < ratingsSize) {
+        if (ratings[i] == ratings[i - 1]) {
+            i++;
+            continue;
+        }
+
+        int currentPeak = 0;
+        while (i < ratingsSize && ratings[i] > ratings[i - 1]) {
+            currentPeak++;
+            totalCandies += currentPeak;
+            i++;
+        }
+
+        if (i == ratingsSize) {
+            return totalCandies;
+        }
+
+        int currentValley = 0;
+        while (i < ratingsSize && ratings[i] < ratings[i - 1]) {
+            currentValley++;
+            totalCandies += currentValley;
+            i++;
+        }
+
+        totalCandies -= (currentPeak < currentValley) ? currentPeak : currentValley;
+    }
+
+    return totalCandies;
+}
