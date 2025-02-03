@@ -1,0 +1,57 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ *
+ */
+
+int sumNumbers(struct TreeNode* root) {
+    char* stack = (char*)calloc(12, sizeof(char));
+    struct TreeNode** node_stack =
+        (struct TreeNode**)calloc(12, sizeof(struct TreeNode*));
+    int* visited = (int*)calloc(12, sizeof(int));
+    int head = 0;
+    int sum = 0;
+    struct TreeNode* node = (struct TreeNode*)calloc(1, sizeof(struct TreeNode));
+    node->right = root;
+    node_stack[head] = node;
+
+    if (root == NULL)
+        return 0;
+
+     do{
+        node = node_stack[head];
+        if(node->right != NULL && visited[head] == 0){
+            visited[head] = 1;
+            node = node->right;
+            while(node != NULL){
+                head++;
+                node_stack[head] = node;
+                stack[head-1] = node->val + '0';
+                node = node->left;
+            }
+        }
+        else{
+            if(node->left == NULL && node->right == NULL){
+                node_stack[head+1] = NULL;
+                stack[head] = '\0';
+                sum += atoi(stack);
+                printf("%d",sum);
+            }
+            if(visited[head] == 1){
+                visited[head] = 0;
+            }
+            head--;
+                
+            }
+        }while (head > 0);
+        free(node_stack);
+        free(stack);
+        free(visited);
+        return sum;
+
+    }
+
+    
