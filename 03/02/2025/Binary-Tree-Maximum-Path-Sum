@@ -1,0 +1,48 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int help(struct TreeNode *root, int *ans) {
+
+        if(root == NULL)
+            return 0;
+        
+        int left = help(root->left, ans);
+        int right = help(root->right, ans);
+        int max;
+
+        max = root->val;
+        if(max < max + left)
+            max = max + left;
+        if(max < max + right)
+            max = max + right;
+
+        if(*ans < max)
+            *ans = max;
+
+        if(left < 0 && right < 0)
+            return root->val;
+        else
+            return root->val+ (left > right ? left : right);
+
+}
+
+
+int maxPathSum(struct TreeNode* root) {
+
+    if(root == NULL)
+        return 0;
+    
+    int ans = INT_MIN;
+    int val;
+    val = help(root, &ans);
+    if(ans < val)
+        return val;
+    else
+        return ans;
+}
