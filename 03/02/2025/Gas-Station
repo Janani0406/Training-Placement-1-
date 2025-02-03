@@ -1,0 +1,14 @@
+int canCompleteCircuit(int* gas, int gasSize, int* cost, int costSize) {
+    int lowest_index;
+    int lowest_gas = INT_MAX;
+    long cur_gas = 0;
+    for (int index = 0; index < gasSize; index++) {
+        cur_gas += gas[index] - cost[index];
+        if (cur_gas < lowest_gas) {
+            lowest_gas = cur_gas;
+            lowest_index = index;
+        }
+    }
+    // fprintf(stdout, "%d", lowest_gas);
+    return cur_gas >= 0 ? (lowest_index + 1) % gasSize : -1;
+}
