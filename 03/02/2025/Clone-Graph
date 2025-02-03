@@ -1,0 +1,51 @@
+/**
+ * Definition for a Node.
+ * struct Node {
+ *     int val;
+ *     int numNeighbors;
+ *     struct Node** neighbors;
+ * };
+ */
+
+typedef struct Node node;
+static int seen[100];
+
+void bfs_allocate(node *n, node **all_nodes){
+    // function to allocate all the new nodes
+    int val = n->val - 1;
+    seen[val] = 1;
+    node *newnode = malloc(sizeof(node));
+    newnode->val = n->val;
+    newnode->numNeighbors = n->numNeighbors;
+    newnode->neighbors = malloc(sizeof(node*)*(n->numNeighbors));
+    all_nodes[val] = newnode;
+    
+    for(int i=0; i<n->numNeighbors; i++)
+        if(!seen[n->neighbors[i]->val - 1])
+            bfs_allocate(n->neighbors[i], all_nodes);
+    return;
+}
+
+void bfs_hookup(node *n, node **all_nodes){
+    // function to connect all the nodes
+    seen[n->val-1] = 0;
+    node *copy = all_nodes[n->val - 1];
+    for(int i=0; i<copy->numNeighbors; i++){
+        copy->neighbors[i] = all_nodes[(n->neighbors[i])->val - 1];
+        if(seen[n->neighbors[i]->val-1])
+            bfs_hookup(n->neighbors[i], all_nodes);
+    }
+
+    return;
+}
+
+struct Node *cloneGraph(struct Node *s) {
+    if(!s) return NULL;
+    node **all_nodes = malloc(sizeof(node*)*100);
+    memset(seen, 0, sizeof(int)*100);
+    bfs_allocate(s, all_nodes);
+    bfs_hookup(s, all_nodes);
+    node *head = all_nodes[0];
+    free(all_nodes);
+    return head;
+}
