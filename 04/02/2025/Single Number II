@@ -1,0 +1,29 @@
+int singleNumber(int* nums, int numsSize) {
+    int bit_counter[32] = {0, 0, 0, 0, 0, 0, 0, 0,
+                           0, 0, 0, 0, 0, 0, 0, 0,
+                           0, 0, 0, 0, 0, 0, 0, 0,
+                           0, 0, 0, 0, 0, 0, 0, 0};
+    do {
+        int num = nums[numsSize - 1]; // current element
+        int index = 31; // index to insert at for bit_counter
+        // convert num to binary, and do bitwise mod 3
+        while (num && index >= 0) { // TODO this is not ready to deal with negative numbers
+            if (num & 1) {
+                // increment bit counter with mod 3 
+                bit_counter[index] = (bit_counter[index] < 2 ) ? bit_counter[index] + 1 : 0;
+            } // don't need to do anything if bit is 0
+            num >>= 1; // move bits to the right by 1 (divide by 2)
+            --index;
+        }
+    }
+    while (--numsSize > 0);
+
+    long int multiplier = 1;
+    int accumulator = 0;
+    for (int i = 0; i < 32; i++) { // max multiplier is -2^31
+        accumulator += multiplier * bit_counter[32 - i - 1];
+        multiplier <<= 1;
+    }
+
+    return accumulator;
+}
