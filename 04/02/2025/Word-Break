@@ -1,0 +1,71 @@
+#define PRINT
+bool search_word(char *s,int *k,int num,char**wordDoct)
+{
+    int word_len = strlen(wordDoct[num]);
+    int found = 1,i=*k;
+    for(int j=0;j<word_len;j++)
+    {
+#if 0//def PRINT
+        printf("s[%d] %c wordDoct[%d][%d] %c\n",i,s[i],num,j,wordDoct[num][j]);
+#endif
+        if(s[i] != wordDoct[num][j])
+        {
+            found = 0;
+            //i = str_index;
+            break;
+        }
+        i++;
+    }
+
+    if(found)
+    {
+        *k = i;
+    }
+    return found;
+}
+int str_len;
+char dp[1000][1001];
+bool find_word_break(char*s,int str_index,char**wordDoct,int wordDictSize,int dic_index)
+{
+    if(dic_index>= wordDictSize)
+    {
+        return 0;
+    }
+    int i = str_index,start_str_index = str_index;
+    int found = 0,last_found_index = str_index;
+    //printf("str_index:%d dic_index %d dp[%d][%d] %d\n",str_index,dic_index,i,dic_index,dp[dic_index][i]);    
+    if(dp[dic_index][i] != -1)
+    {
+        return dp[dic_index][i];
+    }
+
+    found = search_word(s,&str_index,dic_index,wordDoct);
+    //printf("i %d str_index %d dic_index %d found %d\n",i,str_index,dic_index,found);
+    if(found && str_index<str_len)
+    {
+        found = find_word_break(s,str_index,wordDoct,wordDictSize,0);
+        dp[0][str_index] = found;
+        //printf("res = %d str_index %d\n",found,str_index);
+    }
+    if(!found && str_index<str_len)
+    {
+        found = find_word_break(s,i,wordDoct,wordDictSize,dic_index+1);
+        dp[dic_index+1][i] = found;
+    }
+    
+    return found;
+}
+bool wordBreak(char* s, char** wordDict, int wordDictSize) {
+//    printf("wordDictSize %d %s\n",wordDictSize,wordDict[0]);
+    str_len = strlen(s);
+    int f;
+    memset(dp,-1,1000*1001);
+    for(int i = 0;i<1;i++)
+    {
+        if(find_word_break(s,0,wordDict,wordDictSize,i))
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
