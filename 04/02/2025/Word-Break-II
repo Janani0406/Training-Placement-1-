@@ -1,0 +1,92 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int     size, slen, dsize;
+char    **res, **dict;
+int     *words;
+char    *str;
+
+char    *strjoin(char *s1, char *s2)
+{
+    int i = 0, j = 0, k = 0;
+    char    *res;
+
+    i = strlen(s1) + strlen(s2);
+    res = malloc(sizeof(char) * (i + 2));
+    i = 0;
+    while (s1[i])
+        res[k++] = s1[i++];
+    res[k++] = ' ';
+    while (s2[j])
+        res[k++] = s2[j++];
+    res[k] = 0;
+    return (res);
+}
+
+void    add_result(void)
+{
+    char    **new_res;
+    int     i = 0;
+    char    *tmp;
+
+    size++;
+    new_res = calloc(sizeof(char* ), size);
+    while (i < size - 1)
+    {
+        new_res[i] = res[i];
+        i++;
+    }
+    i = 0;
+    while (words[i])
+    {
+        if (i == 0)
+            tmp = strdup(dict[words[i] - 1]);
+        else
+        {
+            tmp = strjoin(new_res[size - 1], dict[words[i] - 1]);
+            free (new_res[size - 1]);
+        }
+        new_res[size - 1] = tmp;
+        i++;
+    }
+    free (res);
+    res = new_res;
+}
+
+void    build_strings(int i, int idx, int len)
+{
+    if (len == slen)
+    {
+        add_result();
+        return ;
+    }
+    if (idx == dsize)
+        return ;
+
+    int d_len = strlen(dict[idx]);
+
+    if (strncmp(&str[len], dict[idx], d_len))
+        build_strings(i, idx + 1, len);
+    else
+    {
+        words[i] = idx + 1;
+        len += d_len;
+        build_strings(i + 1, 0, len);
+        len -= d_len;
+        words[i] = 0;
+        build_strings(i, idx + 1, len);
+    }
+}
+
+char** wordBreak(char* s, char** wordDict, int wordDictSize, int* returnSize) {
+    words = calloc(sizeof(int), 21);
+    slen = strlen(s);
+    size = 0;
+    str = s;
+    dict = wordDict;
+    dsize = wordDictSize;
+    res = NULL;
+    build_strings(0, 0, 0);
+    *returnSize = size;
+    return (res);
+}
