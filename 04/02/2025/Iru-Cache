@@ -1,0 +1,133 @@
+#define MAX_CAPACITY 3000
+#define KEY_RANGE    10001
+#define INVALID      (~0U)
+
+// Structure for LRU Cache
+typedef struct {
+    unsigned int capacity;   // Maximum capacity of the cache
+    unsigned int size;       // Current number of elements in the cache
+    unsigned int posForKey[KEY_RANGE]; // Maps keys to their positions in the cache
+    unsigned int keys[MAX_CAPACITY + 2]; // Stores keys in the cache
+    unsigned int values[MAX_CAPACITY + 2]; // Stores values corresponding to keys
+    unsigned int prev[MAX_CAPACITY + 2]; // Links for doubly linked list (previous)
+    unsigned int next[MAX_CAPACITY + 2]; // Links for doubly linked list (next)
+    unsigned int freeStack[MAX_CAPACITY]; // Stack of free indices for new entries
+    unsigned int freeTop;    // Top index of the free stack
+} LRUCache;
+
+// Link two nodes in the doubly linked list
+static inline void link_nodes(LRUCache *obj, unsigned int a, unsigned int b) {
+    obj->next[a] = b;
+    obj->prev[b] = a;
+}
+
+// Remove a node from the doubly linked list
+static inline void remove_node(LRUCache *obj, unsigned int idx) {
+    unsigned int p = obj->prev[idx];
+    unsigned int n = obj->next[idx];
+    link_nodes(obj, p, n);
+}
+
+// Insert a node right after the head sentinel
+static inline void insert_after_head(LRUCache *obj, unsigned int idx) {
+    unsigned int oldFirst = obj->next[0];
+    link_nodes(obj, 0, idx);
+    link_nodes(obj, idx, oldFirst);
+}
+
+// Move a node to the front of the LRU list (most recently used)
+static inline void move_to_head(LRUCache *obj, unsigned int idx) {
+    remove_node(obj, idx);
+    insert_after_head(obj, idx);
+}
+
+// Pop the top free index from the free stack
+static inline unsigned int pop_free(LRUCache *obj) {
+    return obj->freeStack[--obj->freeTop];
+}
+
+// Push an index back onto the free stack
+static inline void push_free(LRUCache *obj, unsigned int idx) {
+    obj->freeStack[obj->freeTop++] = idx;
+}
+
+// Create a new LRUCache with the given capacity
+LRUCache* lRUCacheCreate(unsigned int capacity) {
+    static LRUCache cache;
+
+    // Adjust capacity to stay within allowed limits
+    if (capacity < 1) capacity = 1;
+    if (capacity > MAX_CAPACITY) capacity = MAX_CAPACITY;
+
+    cache.capacity = capacity;
+    cache.size = 0;
+
+    // Initialize all keys as not present
+    for (unsigned int k = 0; k < KEY_RANGE; k++) {
+        cache.posForKey[k] = INVALID;
+    }
+
+    // Initialize the doubly linked list with head and tail sentinels
+    cache.prev[0] = INVALID;
+    cache.next[0] = 1;
+    cache.prev[1] = 0;
+    cache.next[1] = INVALID;
+
+    // Initialize the free stack with available indices
+    cache.freeTop = 0;
+    for (unsigned int idx = 2; idx < capacity + 2; idx++) {
+        cache.freeStack[cache.freeTop++] = idx;
+    }
+
+    return &cache;
+}
+
+// Retrieve the value associated with a key, or -1 if not found
+int lRUCacheGet(LRUCache* obj, unsigned int key) {
+    if (key >= KEY_RANGE) return -1;
+
+    unsigned int idx = obj->posForKey[key];
+    if (idx == INVALID) {
+        return -1; // Key not in cache
+    }
+    move_to_head(obj, idx); // Mark as recently used
+    return (int) obj->values[idx];
+}
+
+// Add or update a key-value pair in the cache
+void lRUCachePut(LRUCache* obj, unsigned int key, unsigned int value) {
+    if (key >= KEY_RANGE) {
+        return; // Invalid key, do nothing
+    }
+    unsigned int idx = obj->posForKey[key];
+
+    if (idx != INVALID) {
+        obj->values[idx] = value; // Update value
+        move_to_head(obj, idx); // Mark as recently used
+        return;
+    }
+
+    // Cache is full, evict the least recently used item
+    if (obj->size == obj->capacity) {
+        unsigned int lruIdx = obj->prev[1];
+        unsigned int lruKey = obj->keys[lruIdx];
+
+        remove_node(obj, lruIdx);
+        obj->posForKey[lruKey] = INVALID;
+        push_free(obj, lruIdx);
+        obj->size--;
+    }
+
+    // Add the new key-value pair
+    unsigned int newIdx = pop_free(obj);
+    obj->keys[newIdx] = key;
+    obj->values[newIdx] = value;
+    insert_after_head(obj, newIdx);
+    obj->posForKey[key] = newIdx;
+    obj->size++;
+}
+
+// Free resources associated with the cache (no-op for static implementation)
+void lRUCacheFree(LRUCache* obj) {
+    (void)obj;
+}
