@@ -1,0 +1,75 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
+void reorderList(struct ListNode* head) {
+    if (!head || !head->next) {
+        return; // 0 or 1 node => nothing to reorder
+    }
+
+    /* ----------------- 1) Find Middle Using Slow/Fast ----------------- */
+    struct ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;        // move slow by 1
+        fast = fast->next->next;  // move fast by 2
+    }
+    // Now 'slow' is at (or just after) the middle of the list
+
+    /* ----------------- 2) Reverse Second Half in Place ---------------- */
+    struct ListNode *curr = slow->next; 
+    slow->next = NULL; // break first half at 'slow'
+    struct ListNode *prev = NULL;
+    while (curr) {
+        struct ListNode *next = curr->next;  // temporary save
+        curr->next = prev;                  // reverse pointer
+        prev = curr;                        // move prev forward
+        curr = next;                        // move curr forward
+    }
+    // 'prev' is now the head of the reversed second half
+
+    /* ----------------- 3) Merge the Two Halves ---------------- */
+    // First half: head
+    // Second half (reversed): prev
+    struct ListNode *p1 = head;
+    struct ListNode *p2 = prev;
+
+    while (p2) {
+        // Save next pointers
+        struct ListNode *tmp1 = p1->next;
+        struct ListNode *tmp2 = p2->next;
+
+        // Link p1 -> p2 -> tmp1
+        p1->next = p2;
+        p2->next = tmp1;
+
+        // Advance
+        p1 = tmp1;
+        p2 = tmp2;
+    }
+}
+
+/* ------------- Helper Code for Demo (Not required in final) ------------- */
+
+struct ListNode* createNode(int val) {
+    struct ListNode* node = (struct ListNode*)malloc(sizeof(struct ListNode));
+    node->val = val;
+    node->next = NULL;
+    return node;
+}
+
+// Print the list for verification
+void printList(struct ListNode* head) {
+    while (head) {
+        printf("%d -> ", head->val);
+        head = head->next;
+    }
+    printf("NULL\n");
+}
