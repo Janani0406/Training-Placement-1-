@@ -1,0 +1,71 @@
+/**
+ * Definition for a Node.
+ * struct Node {
+ *     int val;
+ *     struct Node *next;
+ *     struct Node *random;
+ * };
+ */
+ struct Node* ins_front(struct Node* node, int ele)
+{
+    struct Node* temp = (struct Node*) malloc (sizeof(struct Node)); // Allocate memory for a new node
+    struct Node* tempnode;
+    temp->next = NULL;
+    temp->val = ele;
+
+    if (node == NULL)
+        return temp; // If the list is empty, return the new node as the head
+    
+    tempnode = node;
+    while (tempnode->next != NULL)
+        tempnode = tempnode->next; // Traverse to the end of the list
+    
+    tempnode->next = temp; // Append the new node at the end of the list
+    
+    return node; // Return the head of the list
+}
+
+struct Node* copyRandomList(struct Node* head) {
+    if(head == NULL)
+        return head;
+   
+    struct Node* temp = head;
+    while(temp!= NULL)       // copy nodes in b/w original nodes 
+    {
+        struct Node* create = (struct Node*) malloc (sizeof(struct Node));
+        create->random = NULL;
+        create->val = temp->val; 
+        create->next = temp->next;
+        temp->next = create;
+
+        temp = temp->next->next;
+    }
+    temp = head;
+    while(temp!=NULL) // assigning random pointers to the coopied list
+    {   
+        if(temp->random ==   NULL)
+            temp->next->random = NULL;
+        else
+            temp->next->random = temp->random->next;
+        
+        temp = temp->next->next;
+    }
+    temp = head;
+    struct Node* new = head->next;
+    struct Node* copy = head->next;
+
+   while (temp != NULL)   // assigning next pointer to the copied list 
+   {
+        temp->next = temp->next->next;
+        if (copy->next != NULL) 
+        {
+            copy->next = copy->next->next;
+        }
+        temp = temp->next;
+        copy = copy->next;
+    }
+
+   return new;
+
+    
+}
